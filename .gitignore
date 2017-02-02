@@ -87,3 +87,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
+*.x86_64
+Default*
+data/
+
