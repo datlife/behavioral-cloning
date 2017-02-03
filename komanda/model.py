@@ -18,14 +18,10 @@
 
 import tensorflow as tf
 from komanda.constants import *
-from komanda.helpers import read_csv, process_csv, apply_vision_simple, get_optimizer
+from komanda.helpers import  apply_vision_simple, get_optimizer
 from komanda.RNNCell import SamplingRNNCell
 
 graph = tf.Graph()
-# concatenated interpolated.csv from ros bags
-# (train_seq, valid_seq), (mean, std) = process_csv(filename="output/interpolated_concat.csv", val=5)
-# interpolated.csv for TestSet filled with dummy values
-# test_seq = read_csv("challenge_2/exampleSubmissionInterpolatedFinal.csv")
 
 with graph.as_default():
     # inputs

@@ -44,8 +44,3 @@ def pre_process(img, mean_img):
     normalized_img -= mean_img
     return normalized_img
 
-# def gcn(image):
-
-# def brighten(img, level):
-#
-# def darken(img, level):

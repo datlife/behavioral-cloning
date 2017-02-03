@@ -2,6 +2,7 @@ import os
 import numpy as np
 from komanda.model import *
 from komanda.BatchGenerator import BatchGenerator
+from komanda.helpers import read_csv, process_csv
 
 gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1.0)
 checkpoint_dir = os.getcwd() + "/v3"
@@ -10,6 +11,11 @@ global_valid_step = 0
 KEEP_PROB_TRAIN = 0.25
 NUM_EPOCHS = 100
 best_validation_score = None
+
+# concatenated interpolated.csv from ros bags
+(train_seq, valid_seq), (mean, std) = process_csv(filename="output/interpolated_concat.csv", val=5)
+# interpolated.csv for TestSet filled with dummy values
+test_seq = read_csv("challenge_2/exampleSubmissionInterpolatedFinal.csv")
 
 
 def do_epoch(session, sequences, mode):
