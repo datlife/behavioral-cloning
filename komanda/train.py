@@ -1,10 +1,10 @@
 import os
 import numpy as np
-from .model import *
+from komanda.model import *
+from komanda.BatchGenerator import BatchGenerator
 
 gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=1.0)
 checkpoint_dir = os.getcwd() + "/v3"
-
 global_train_step = 0
 global_valid_step = 0
 KEEP_PROB_TRAIN = 0.25
@@ -14,11 +14,16 @@ best_validation_score = None
 
 def do_epoch(session, sequences, mode):
     global global_train_step, global_valid_step
+
     test_predictions = {}
     valid_predictions = {}
+
     batch_generator = BatchGenerator(sequence=sequences, seq_len=SEQ_LEN, batch_size=BATCH_SIZE)
     total_num_steps = 1 + (batch_generator.indices[1] - 1) / SEQ_LEN
-    controller_final_state_gt_cur, controller_final_state_autoregressive_cur = None, None
+
+    controller_final_state_gt_cur = None
+    controller_final_state_autoregressive_cur = None
+
     acc_loss = np.float128(0.0)
     for step in range(total_num_steps):
         feed_inputs, feed_targets = batch_generator.next()

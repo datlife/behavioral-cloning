@@ -91,3 +91,6 @@ ENV/
 Default*
 data/
 
+.idea/
+.idea/dictionaries/
+.idea/dictionaries/datinfo.xml

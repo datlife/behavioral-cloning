@@ -25,8 +25,8 @@ class SamplingRNNCell(tf.nn.rnn_cell.RNNCell):
         prev_output, prev_state_internal = state
         context = tf.concat(1, [prev_output, visual_feats])
         # here the internal cell (e.g. LSTM) is called
-        new_output_internal, new_state_internal = internal_cell(context,
-                                                                prev_state_internal)
+        new_output_internal, new_state_internal = self._internal_cell(context, prev_state_internal)
+        
         new_output = tf.contrib.layers.fully_connected(
             inputs=tf.concat(1, [new_output_internal, prev_output, visual_feats]),
             num_outputs=self._num_outputs,

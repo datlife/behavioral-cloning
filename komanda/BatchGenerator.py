@@ -9,6 +9,7 @@ from .constants import *
 # the next starts are simply ignored.
 # (Actually, LEFT_CONTEXT frames are also added to the left of the input sequence; see code below for details).
 
+
 class BatchGenerator(object):
     def __init__(self, sequence, seq_len, batch_size):
         self.sequence = sequence
