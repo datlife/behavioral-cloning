@@ -1,4 +1,7 @@
-import pandas as pd
+import numpy as np
+from utils.DataSet import DataSet
+from keras.models import Model
+from keras.layers import Input, Convolution2D, Dense, Dropout, Flatten, MaxPooling2D
 import matplotlib.pyplot as plt
 plt.interactive(False)
 
@@ -6,24 +9,39 @@ plt.interactive(False)
 KEEP_PROP = 0.2
 LEARN_RATE = 0.001
 EPOCHS = 10
-IMG_PATH = './data/IMG'
-CSV_HEADERS = ['center', 'left', 'right', 'steer_angle', 'throttle', 'speed']
+
+LOG_PATH = './data/driving_log.csv'
+IMG_PATH = './data/IMG/'
 
 # Import data
-df = pd.read_csv('./data/driving_log.csv', names=CSV_HEADERS, index_col=False)
-# Visualize Angles
-p = plt.figure()
-left = p.add_subplot(1, 2, 1).bar(df.steer_angle.index, df.steer_angle.values, width=0.01)
-# Visualize histogram
-hist = df.steer_angle.value_counts()
-right = p.add_subplot(122).bar(hist.index,  hist.values, width=0.01)
+data = DataSet(log_path=LOG_PATH, img_dir_path=IMG_PATH)
+X_train, y_train = data.get_train_data()
 
-plt.show()
+X_train = X_train/255 - 0.5
+# Build Model
+# CNN Model - Pre-trained Model
+features = Input(shape=(160, 320 * 3, 3))
+x = Convolution2D(3, 1, 1, border_mode='same')(features)
+x = Convolution2D(32, 3, 3, activation='relu', border_mode='same')(x)
+x = MaxPooling2D((8, 8), strides=(8, 8))(x)
+x = Dropout(0.25)(x)
 
-# Data Pre-processing
-# X_train = -1.0 + 2.0*X_train/255   # Shape (SequenceID, 160, 320, 3)
+x = Convolution2D(64, 3, 3, activation='relu', border_mode='same')(x)
+x = MaxPooling2D((4, 4), strides=(4, 4))(x)
+x = Dropout(0.25)(x)
 
-# Train
+x = Convolution2D(128, 3, 3, activation='relu', border_mode='same')(x)
+x = MaxPooling2D((2, 2), strides=(2, 2))(x)
+x = Dropout(0.5)(x)
 
+y = Flatten()(x)
+y = Dense(1024, activation='relu')(y)
+y = Dropout(.5)(y)  # <-- Trim last layer and feed to GRU RNN - Need to te trained first
+predictions = Dense(2)(y)
+
+model = Model(input=features, output=predictions)
+# Compile and Train
+model.compile(optimizer='Adam', loss='mse', metrics=['accuracy'])
+model.fit(X_train, y_train, batch_size=8, nb_epoch=3, validation_split=0.2)
 
 # Post-process angle

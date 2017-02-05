@@ -14,10 +14,9 @@ plt.interactive(False)
 IMG_PATH = './data/IMG'
 CSV_HEADERS = ['center', 'left', 'right', 'steer_angle', 'throttle', 'speed']
 
-# Import data
 df = pd.read_csv('./data/driving_log.csv', names=CSV_HEADERS, index_col=False)
 
-# ############################# VISUALIZE FRAME + STEER VALUES ###############################
+# VISUALIZE FRAME + STEER VALUES
 fig = plt.figure(figsize=(60, 60))
 gs = grid.GridSpec(10, 5)
 
@@ -37,7 +36,7 @@ for i in range(10):
 gs.tight_layout(fig)
 
 
-# ############################# VISUAL STEERING ANGLES ######################################
+#  VISUAL STEERING ANGLES
 hist = df.steer_angle.value_counts()
 
 p = plt.figure()
@@ -47,3 +46,6 @@ right = p.add_subplot(122).bar(hist.index,  hist.values, width=0.01)
 right.set_title('Steering Angle Histogram')
 plt.show()
 
+# https://github.com/mohankarthik/CarND-BehavioralCloning-P3
+# https://github.com/ksakmann/CarND-BehavioralCloning
+# https://yerevann.github.io/2016/06/26/combining-cnn-and-rnn-for-spoken-language-identification/

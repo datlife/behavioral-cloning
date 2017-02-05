@@ -1,12 +1,13 @@
 import numpy as np
-from .constants import *
+from constants import *
 # Input/output format
-# Our data is presented as a long sequence of observations (several concatenated rosbags).
+# Our data is presented as a long sequence of observations (several concatenated ros-bag).
 #
 # We need to chunk it into a number of batches: for this, we will create BATCH_SIZE cursors.
-# Let the starting points be uniformly spaced in our long sequence. We will advance them by SEQ_LEN at each step,
-# creating a BATCH_SIZE x SEQ_LEN matrix of training examples. Boundary effects when one rosbag ends and
-# the next starts are simply ignored.
+# Let the starting points be uniformly spaced in our long sequence.
+# We will advance them by SEQ_LEN at each step, creating a BATCH_SIZE x SEQ_LEN matrix of training examples.
+
+# Boundary effects when one ros-bag ends and the next starts are simply ignored.
 # (Actually, LEFT_CONTEXT frames are also added to the left of the input sequence; see code below for details).
 
 

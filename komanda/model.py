@@ -17,9 +17,9 @@
 # Note: if the saver definition doesn't work for you please make sure you are using TensorFlow 0.12rc0 or newer.
 
 import tensorflow as tf
-from komanda.constants import *
-from komanda.helpers import  apply_vision_simple, get_optimizer
-from komanda.RNNCell import SamplingRNNCell
+from constants import *
+from helpers import apply_vision_simple, get_optimizer
+from RNNCell import SamplingRNNCell
 
 graph = tf.Graph()
 
