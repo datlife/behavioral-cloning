@@ -20,14 +20,13 @@ X_train, y_train = data.get_train_data()
 X_train = X_train/255 - 0.5
 # Build Model
 # CNN Model - Pre-trained Model
-features = Input(shape=(160, 320 * 3, 3))
-x = Convolution2D(3, 1, 1, border_mode='same')(features)
-x = Convolution2D(32, 3, 3, activation='relu', border_mode='same')(x)
-x = MaxPooling2D((8, 8), strides=(8, 8))(x)
+features = Input(shape=(80, 160 * 3, 3))
+x = Convolution2D(32, 3, 3, activation='relu', border_mode='same')(features)
+x = MaxPooling2D((2, 2), strides=(2, 2))(x)
 x = Dropout(0.25)(x)
 
 x = Convolution2D(64, 3, 3, activation='relu', border_mode='same')(x)
-x = MaxPooling2D((4, 4), strides=(4, 4))(x)
+x = MaxPooling2D((2, 2), strides=(2, 2))(x)
 x = Dropout(0.25)(x)
 
 x = Convolution2D(128, 3, 3, activation='relu', border_mode='same')(x)

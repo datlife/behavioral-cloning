@@ -2,6 +2,7 @@ import cv2
 import os
 import pandas as pd
 import numpy as np
+from scipy.misc import imresize
 # # git+https://github.com/uqfoundation/pathos.git@master
 # http://stackoverflow.com/questions/1816958/cant-pickle-type-instancemethod-when-using-pythons-multiprocessing-pool-ma
 
@@ -33,6 +34,7 @@ class DataSet(object):
             for image in ['right', 'center', 'left']:
                 img_file = self.df.loc[i][image].rsplit('/')[-1]  # Extract image file only
                 img = cv2.imread(os.path.join(self.img_path, img_file))
+                img = imresize(img, 0.5)
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 if panorama_img is None:
                     panorama_img = img
