@@ -1,5 +1,5 @@
 import tensorflow as tf
-from constants import *
+from komanda.constants import *
 slim = tf.contrib.slim
 
 

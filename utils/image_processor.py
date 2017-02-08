@@ -6,13 +6,17 @@ def random_transform(img):
     # There are total of 6 transformation
     # I will create an boolean array of 6 elements [ 0 or 1]
     a = np.random.randint(0, 2, [1, 5]).astype('bool')[0]
-    if a[1] == 1:
-        img = rotate(img)
-    if a[3] == 1:
-        img = blur(img)
+    flip_angle = 1
+    # if a[1] == 1:
+    #     img = rotate(img)
+    if a[2] == 1:
+        img = flip(img)
+        flip_angle = -1  # to swap the steering angle
+    # if a[3] == 1:
+    #     img = blur(img)
     if a[4] == 1:
         img = gamma(img)
-    return img
+    return img, flip_angle
 
 
 def rotate(img):
@@ -25,7 +29,7 @@ def rotate(img):
 
 
 def gamma(img):
-    gamma = np.random.uniform(0.3, 1.3)
+    gamma = np.random.uniform(0.5, 1.2)
     invGamma = 1.0 / gamma
     table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
     new_img = cv2.LUT(img, table)
@@ -38,9 +42,7 @@ def blur(img):
     return cv2.GaussianBlur(img, (odd_size, odd_size), 0)
 
 
-def pre_process(img, mean_img):
-    # Normalize data
-    normalized_img = img/255.
-    normalized_img -= mean_img
-    return normalized_img
+def flip(img):
+    return np.fliplr(img)
+
 

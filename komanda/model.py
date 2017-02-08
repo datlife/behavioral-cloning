@@ -17,10 +17,10 @@
 # Note: if the saver definition doesn't work for you please make sure you are using TensorFlow 0.12rc0 or newer.
 
 import tensorflow as tf
-from constants import *
-from helpers import apply_vision_simple, get_optimizer
-from RNNCell import SamplingRNNCell
-
+from komanda.constants import *
+from komanda.helpers import get_optimizer
+from komanda.RNNCell import SamplingRNNCell
+from komanda.cnn_model import apply_vision_simple
 graph = tf.Graph()
 
 with graph.as_default():
@@ -29,7 +29,7 @@ with graph.as_default():
     keep_prob = tf.placeholder_with_default(input=1.0, shape=())
     aux_cost_weight = tf.placeholder_with_default(input=0.1, shape=())
 
-    # path to png files from the central camera
+    # IMAGE PATH to png files from the central camera
     inputs = tf.placeholder(shape=(BATCH_SIZE, LEFT_CONTEXT + SEQ_LEN), dtype=tf.string)
 
     # seq_len x batch_size x OUTPUT_DIM
@@ -39,8 +39,7 @@ with graph.as_default():
 
     # ================================= INPUT IMAGE ================================================ #
     input_images = tf.pack([tf.image.decode_png(tf.read_file(x))
-                            for x in tf.unpack(tf.reshape(inputs,
-                                                          shape=[(LEFT_CONTEXT + SEQ_LEN) * BATCH_SIZE]))])
+                            for x in tf.unpack(tf.reshape(inputs, shape=[(LEFT_CONTEXT + SEQ_LEN) * BATCH_SIZE]))])
     # Normalize image
     input_images = -1.0 + 2.0 * tf.cast(input_images, tf.float32) / 255.0
     input_images = tf.reshape(input_images, shape=[(LEFT_CONTEXT + SEQ_LEN) * BATCH_SIZE, HEIGHT, WIDTH, CHANNELS])
@@ -50,18 +49,19 @@ with graph.as_default():
                                                      batch_size=BATCH_SIZE, seq_len=SEQ_LEN)
     visual_conditions = tf.reshape(visual_conditions_reshaped, [BATCH_SIZE, SEQ_LEN, -1])
     visual_conditions = tf.nn.dropout(x=visual_conditions, keep_prob=keep_prob)
-
+    # FInal layer layer_norm(tf.nn.elu(net + aux1 + aux2 + aux3 + aux4))
+    # SHAPE : [BATCH SIZE, SEQ_LEN, ...]
     # ================================= LSTM BLOCK =================================================== #
     # Input retrieved from CNN will be feed into RNN
     rnn_inputs_with_ground_truth = (visual_conditions, targets_normalized)
+
+    # INITIAL STATE
     rnn_inputs_autoregressive = (visual_conditions, tf.zeros(shape=(BATCH_SIZE, SEQ_LEN, OUTPUT_DIM),
                                                              dtype=tf.float32))
 
     internal_cell = tf.nn.rnn_cell.LSTMCell(num_units=RNN_SIZE, num_proj=RNN_PROJ)
-    cell_with_ground_truth = SamplingRNNCell(num_outputs=OUTPUT_DIM, use_ground_truth=True,
-                                             internal_cell=internal_cell)
-    cell_autoregressive = SamplingRNNCell(num_outputs=OUTPUT_DIM, use_ground_truth=False,
-                                          internal_cell=internal_cell)
+    cell_with_ground_truth = SamplingRNNCell(num_outputs=OUTPUT_DIM, use_ground_truth=True, internal_cell=internal_cell)
+    cell_autoregressive = SamplingRNNCell(num_outputs=OUTPUT_DIM, use_ground_truth=False, internal_cell=internal_cell)
 
 
     def get_initial_state(complex_state_tuple_sizes):
@@ -96,7 +96,7 @@ with graph.as_default():
         out_autoregressive, controller_final_state_autoregressive = tf.nn.dynamic_rnn(cell=cell_autoregressive,
                                                                                       inputs=rnn_inputs_autoregressive,
                                                                                       sequence_length=[SEQ_LEN] * BATCH_SIZE,
-                                                                                      initial_state = controller_initial_state_autoregressive,
+                                                                                      initial_state=controller_initial_state_autoregressive,
                                                                                       dtype=tf.float32,
                                                                                       swap_memory=True,
                                                                                       time_major=False)
@@ -108,9 +108,7 @@ with graph.as_default():
     # steering_predictions = (out_autoregressive[:, :, 0] * std[0]) + mean[0]
     steering_predictions = (out_autoregressive[:, :, 0])
 
-
     total_loss = mse_autoregressive_steering + aux_cost_weight * (mse_gt + mse_autoregressive)
-
     optimizer = get_optimizer(total_loss, learning_rate)
 
     tf.scalar_summary("MAIN TRAIN METRIC: rmse_autoregressive_steering", tf.sqrt(mse_autoregressive_steering))
