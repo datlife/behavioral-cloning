@@ -11,8 +11,9 @@
 import numpy as np
 LEFT_CONTEXT = 5
 from FLAGS import *
-from utils.image_processor import random_transform
+from utils.image_processor import flip
 from utils.car_helper import convert_steering_angle_to_buckets
+
 
 class BatchGenerator(object):
     def __init__(self, sequence, labels, seq_len, batch_size):
@@ -22,12 +23,12 @@ class BatchGenerator(object):
         self.batch_size = batch_size
         self.cursor = 0
 
-    def next(self, scale=2):
+    def next(self, scale=1):
         while True:
             x_train = None
             y_train = None
             for i in range(self.batch_size):
-                frame_block = self.sequence[(i+self.cursor):(i + self.seq_len + self.cursor)]
+                frame_block = self.sequence[(i+self.cursor):(i + self.cursor + self.seq_len)]
                 labels = self.labels[(i+self.cursor):(i + self.seq_len + self.cursor)]
                 if x_train is None:
                     x_train = frame_block
@@ -36,12 +37,17 @@ class BatchGenerator(object):
                     x_train = np.concatenate((x_train, frame_block))   # batch_size x seq_len
                     y_train = np.concatenate((y_train, labels))        # batch_size x seq_len x OUTPUT_DIM
 
+            # Update batch cursor
             self.cursor += self.batch_size*self.seq_len
-            y_train = [[convert_steering_angle_to_buckets(i[0]), i[1]] for i in y_train]
+
             x_train = np.reshape(x_train, newshape=[BATCH_SIZE, TIME_STEPS, HEIGHT, WIDTH, CHANNELS])
             y_train = np.reshape(y_train, newshape=[BATCH_SIZE, TIME_STEPS, OUTPUT_DIM])
             x_train, y_train = self.augment_data(x_train, y_train, scale=scale)
-            y_train = np.mean(y_train, axis=1)
+            # y_train = np.mean(y_train, axis=1)
+            steps = len(x_train)/BATCH_SIZE
+            x_train = x_train[0: steps*BATCH_SIZE]
+            y_train = y_train[0: steps*BATCH_SIZE]
+
             return x_train, y_train
 
     def augment_data(self, X_train, y_train, scale):
@@ -50,23 +56,24 @@ class BatchGenerator(object):
         :param scale:
         :return:
         """
-        a = len(X_train)
         for i in range(scale-1):
-            for b in range(a):
+            for b in range(len(X_train)):
                 block = X_train[b]
                 new_block = []
                 new_label = y_train[b]
-                if np.mean(y_train) < 0:   # Since my model is biased to the right, I need to augment more on the left
-                    for idx, frame in enumerate(block):
-                        new_frame = random_transform(frame)
-                        new_block.append(new_frame)
-                        new_label[idx][0] = new_label[idx][0]     # swap the value of angle if flip is applied
-                    X_train = np.concatenate((X_train, np.expand_dims(np.array(new_block), axis=0)))
-                    y_train = np.concatenate((y_train, np.expand_dims(new_label, axis=0)))
+                # For each frame in block, flip it and build a new frame block
+                for idx, frame in enumerate(block):
+                    new_frame = flip(frame)
+                    new_label[idx][0] *= -1.0
+                    new_block.append(new_frame)
+
+                # Add new frame block to training data
+                X_train = np.concatenate((X_train, np.expand_dims(np.array(new_block), axis=0)))
+                y_train = np.concatenate((y_train, np.expand_dims(new_label, axis=0)))
         return X_train, y_train
 
     def get_seq_size(self):
-        return len(self.seq_len) - BATCH_SIZE*5
+        return len(self.sequence) - BATCH_SIZE*TIME_STEPS
 
     def cursor(self):
         return self.cursor

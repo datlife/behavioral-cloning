@@ -27,25 +27,34 @@ prev_image_array = None
 def telemetry(sid, data):
     if data:
         steering_angle = data["steering_angle"]
+        # The current throttle of the car
         throttle = data["throttle"]
+        # The current speed of the car
         speed = data["speed"]
-        frame_block = []
-        for i in range(TIME_STEPS*BATCH_SIZE):
-            img = data["image"]
-            image = Image.open(BytesIO(base64.b64decode(img)))
-            image = np.asarray(image)
-            image = imresize(image, 0.5)
-            image = image[30:80, :, :]
-            frame_block.append(image)
-        frame_block = np.array(frame_block, dtype='uint8')/255
-        frame_block = np.reshape(frame_block, newshape=[BATCH_SIZE, TIME_STEPS, HEIGHT, WIDTH, CHANNELS])
-
-        prediction = model.predict(frame_block)[0]
-
-        print(prediction)
-        throttle = prediction[1]
-        steering_angle = prediction[0]
+        # frame_block = []
+        # for i in range(TIME_STEPS*BATCH_SIZE):
+        #     img = data["image"]
+        #     image = Image.open(BytesIO(base64.b64decode(img)))
+        #     image = np.asarray(image)
+        #     image = imresize(image, 0.5)
+        #     image = image[30:70, :, :]
+        #     frame_block.append(image)
+        # frame_block = np.reshape(frame_block, newshape=[BATCH_SIZE, TIME_STEPS, HEIGHT, WIDTH, CHANNELS])
+        # prediction = model.predict_on_batch(frame_block)[0]
+        #
+        # throttle = 0.3
+        # steering_angle = prediction[0][-1]
         # POST STEER ANGLE PROCESSING
+        # The current steering angle of the car
+
+        # The current image from the center camera of the car
+        imgString = data["image"]
+        image = Image.open(BytesIO(base64.b64decode(imgString)))
+        image_array = np.asarray(image)
+        image = image_array[70:150, :, :]
+
+        steering_angle = float(model.predict(image[None, :, :, :], batch_size=1))
+        throttle = 0.3
         print(steering_angle, throttle)
         send_control(steering_angle, throttle)
         # save frame
@@ -53,7 +62,6 @@ def telemetry(sid, data):
             timestamp = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
             image_filename = os.path.join(args.image_folder, timestamp)
             image.save('{}.jpg'.format(image_filename))
-        frame_block = []
     else:
         # NOTE: DON'T EDIT THIS.
         sio.emit('manual', data={}, skip_sid=True)

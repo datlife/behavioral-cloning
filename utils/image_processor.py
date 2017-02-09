@@ -7,13 +7,13 @@ def random_transform(img):
     # I will create an boolean array of 6 elements [ 0 or 1]
     a = np.random.randint(0, 2, [1, 5]).astype('bool')[0]
     flip_angle = 1
-    # if a[1] == 1:
-    #     img = rotate(img)
-    if a[2] == 1:
-        img = flip(img)
-        flip_angle = -1  # to swap the steering angle
-    # if a[3] == 1:
-    #     img = blur(img)
+    if a[1] == 1:
+        img = rotate(img)
+    # if a[2] == 1:
+    #     img = flip(img)
+    #     flip_angle = -1  # to swap the steering angle
+    if a[3] == 1:
+        img = blur(img)
     if a[4] == 1:
         img = gamma(img)
     return img, flip_angle
@@ -43,6 +43,6 @@ def blur(img):
 
 
 def flip(img):
-    return np.fliplr(img)
+    return cv2.flip(img, 1)
 
 
