@@ -14,7 +14,9 @@ def convert_steering_angle_to_buckets(steer_angle):
 
     # Borrowed from Car-puter Project from Otavio Good
     # https://github.com/otaviogood/carputer/
-    return round(math.copysign(math.log(abs(steer_angle) + 1.25, 1.25), steer_angle) + 5)
+
+    steer_angle *= 60
+    return round(math.copysign(math.log(abs(steer_angle) + 1.0, 1.5), steer_angle) + 10)
 
 
 def convert_buckets_to_steer_angle(a):
@@ -24,13 +26,14 @@ def convert_buckets_to_steer_angle(a):
     # log_steer = math.copysign( math.log(abs(steers[-1])+1, 2.0) , steers[-1])
     #  0  -> 0, 1  -> 1, -1 -> -1, 2  -> 1.58, -2 -> -1.58, 3  -> 2
     # gtVal = gtArray[i] + 7
-    steer = a - 7
+    steer = a - 10
     original = steer
     steer = abs(steer)
-    steer = math.pow(1.25, steer)
-    steer -= 1.25
+    steer = math.pow(1.53, steer)
+    steer -= 1.0
     steer = math.copysign(steer, original)
     # steer += 90.0
+    steer /= 60
     return steer
 
 

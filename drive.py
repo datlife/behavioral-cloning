@@ -1,21 +1,22 @@
 import argparse
 import base64
-from datetime import datetime
 import os
 import json
 import shutil
-
-import numpy as np
 import socketio
 import eventlet
 import eventlet.wsgi
 from PIL import Image
 from flask import Flask
 from io import BytesIO
+
+import time
+import numpy as np
 from scipy.misc import imresize
 from keras.models import model_from_json
 from FLAGS import *
 from utils.car_helper import convert_buckets_to_steer_angle
+from datetime import datetime
 
 sio = socketio.Server()
 app = Flask(__name__)
@@ -50,11 +51,10 @@ def telemetry(sid, data):
         # The current image from the center camera of the car
         imgString = data["image"]
         image = Image.open(BytesIO(base64.b64decode(imgString)))
-        image_array = np.asarray(image)
-        image = image_array[70:150, :, :]
-
-        steering_angle = float(model.predict(image[None, :, :, :], batch_size=1))
-        throttle = 0.3
+        image = np.asarray(image)
+        image = imresize(image, 0.5)
+        steering_angle = model.predict(image[None, :, :, :], batch_size=1)[0][0]
+        throttle = 0.2
         print(steering_angle, throttle)
         send_control(steering_angle, throttle)
         # save frame

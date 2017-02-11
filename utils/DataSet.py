@@ -14,7 +14,7 @@ class DataSet(object):
     # Training, Validation data set
     # =============================
     ######################################
-    CSV_HEADER = ['center', 'left', 'right', 'steer_angle', 'throttle', 'speed']
+    CSV_HEADER = ['center', 'left', 'right', 'steer_angle', 'throttle', 'brake', 'speed']
 
     def __init__(self, log_path, img_dir_path, sequence=10):
         self.df = pd.read_csv(log_path, names=self.CSV_HEADER, index_col=False)
@@ -31,25 +31,34 @@ class DataSet(object):
         images = []
         left_images = []
         right_images = []
-        for i in range((len(self.df))):
-            for image in ['center']:
+        left_measurements = []
+        right_measurements = []
+        center_measurements = []
+
+        for i in range(len(self.df)):
+            for image in ['center', 'left', 'right']:
                 img_file = self.df.loc[i][image].rsplit('/')[-1]  # Extract image file only
                 img = cv2.imread(os.path.join(self.img_path, img_file))
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 img = imresize(img, 0.5)
-                img = img[30:70, :, :]
-                images.append(img)
-            # steer_angle - throttle
-            measurements = (self.df.loc[i]['steer_angle'], self.df.loc[i]['throttle'])
-            self.y_train.append(np.array(measurements, dtype=float))
+                if image == 'center':
+                    images.append(img)
+                    center_measurements.append((self.df.loc[i]['steer_angle'], self.df.loc[i]['speed']))
+                if image == 'left':
+                    left_images.append(img)
+                    left_measurements.append((self.df.loc[i]['steer_angle'] + 0.15, self.df.loc[i]['speed']))
+                if image == 'right':
+                    right_images.append(img)
+                    right_measurements.append((self.df.loc[i]['steer_angle'] - 0.15, self.df.loc[i]['speed']))
 
-        self.X_train = images
+        self.y_train = np.concatenate((center_measurements, left_measurements, right_measurements))
+        self.X_train = np.concatenate((images, left_images, right_images))
+
         print("Data loaded.")
         self.X_train = np.asarray(self.X_train)
         print("Input shape: ", np.shape(self.X_train))
         print("Label shape: ", np.shape(self.y_train))
         return self.X_train, self.y_train
-
 
     def get_data(self):
         return self.X_train, self.y_train
