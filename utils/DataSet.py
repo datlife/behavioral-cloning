@@ -43,17 +43,17 @@ class DataSet(object):
                 img = imresize(img, 0.5)
                 if image == 'center':
                     images.append(img)
-                    center_measurements.append((self.df.loc[i]['steer_angle'], self.df.loc[i]['speed']))
+                    center_measurements.append((self.df.loc[i]['steer_angle'], self.df.loc[i]['throttle'], self.df.loc[i]['brake']))
                 if image == 'left':
                     left_images.append(img)
-                    left_measurements.append((self.df.loc[i]['steer_angle'] + 0.15, self.df.loc[i]['speed']))
+                    left_measurements.append((self.df.loc[i]['steer_angle'] + 0.20, self.df.loc[i]['throttle'], self.df.loc[i]['brake']))
                 if image == 'right':
                     right_images.append(img)
-                    right_measurements.append((self.df.loc[i]['steer_angle'] - 0.15, self.df.loc[i]['speed']))
+                    right_measurements.append((self.df.loc[i]['steer_angle'] - 0.20, self.df.loc[i]['throttle'], self.df.loc[i]['brake']))
 
         self.y_train = np.concatenate((center_measurements, left_measurements, right_measurements))
         self.X_train = np.concatenate((images, left_images, right_images))
-
+        #
         print("Data loaded.")
         self.X_train = np.asarray(self.X_train)
         print("Input shape: ", np.shape(self.X_train))

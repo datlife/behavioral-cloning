@@ -80,15 +80,13 @@ class BatchGenerator(object):
                 #   1-st augmentation: flip it and build a new frame block
                 #   2-st augmentation: random transform
                 for idx, frame in enumerate(block):
-                    if i == 0:
-                        new_frame = cv2.flip(frame, 1)
-                        augmented_label[idx][0] *= -1.0
-                    if i > 0:
-                        new_frame = random_transform(new_frame)
+                    new_frame = cv2.flip(frame, 1)
+                    augmented_label[idx][0] *= -1.0
                     augmented_block.append(new_frame)
 
                 # Add new frame block to training data
-                X_train = np.concatenate((X_train, np.expand_dims(np.array(augmented_block), axis=0)))
+                augmented_block = np.expand_dims(np.array(augmented_block), axis=0)
+                X_train = np.concatenate((X_train, augmented_block))
                 y_train = np.concatenate((y_train, np.expand_dims(augmented_label, axis=0)))
 
         return X_train, y_train

@@ -14,25 +14,25 @@ measurements = data['labels']
 # ## DATA AUGMENTATION ########
 ###############################
 from utils.image_processor import random_transform
-
+import numpy as np
 augmented_images = []
 augmented_measurements = []
 
 for image, angle in zip(images, measurements):
     flipped_image = cv2.flip(image, 1)
-    flipped_angle = angle * -1.0
+    flipped_angle = float(angle[0]) * -1.0
     augmented_images.append(flipped_image)
     augmented_measurements.append(flipped_angle)
     rand_image, _ = random_transform(image)
     augmented_images.append(rand_image)
-    augmented_measurements.append(angle)
+    augmented_measurements.append(float(angle[0]))
 
 # TODO:
 # How to divide this into frame block for RNN
 print(np.shape(images))
 print(np.shape(augmented_images))
 images = np.concatenate((images, augmented_images))
-measurements = np.concatenate((measurements, augmented_measurements))
+measurements = np.concatenate((np.transpose(measurements)[0], augmented_measurements))
 
 X_train = np.array(images, dtype='uint8')
 y_train = np.array(measurements)
@@ -67,10 +67,3 @@ with open('rnn2.json', 'w') as outfile:
 
 model.save_weights('rnn2.h5')
 print('Model saved')
-
-# Data Processing
-# Convert steering angles into buckets so that I can perform softmax instead of regression
-# This would significantly improve result
-from utils.car_helper import convert_steering_angle_to_buckets
-# y_train = [convert_steering_angle_to_buckets(i) for i in y_train]
-# y_train = to_categorical(y_train, 22)  # For categorical_cross-entropy

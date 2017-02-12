@@ -21,14 +21,12 @@ class DatNet(object):
                  res_layer_params=(3, 16, 3),
                  init='glorot_normal', reg=0.0, use_shortcuts=True):
 
-        self.vision_model = None # it will be assigned in build()
-        self.RNN = None
+        self.vision_model = self.build(input_shape=input_shape, nb_classes=nb_classes,
+                                        layer1_params=layer1_params, res_layer_params=res_layer_params,
+                                        init=init, reg=reg, use_shortcuts=use_shortcuts)
+        self.RNN  = self.build_rnn()
 
-        self.build(input_shape=input_shape, nb_classes=nb_classes,
-                              layer1_params=layer1_params, res_layer_params=res_layer_params,
-                              init=init, reg=reg, use_shortcuts=use_shortcuts)
-
-    def train(self, batch_generator=None, epochs=2, augmentation_scale=3):
+    def train_rnn(self, batch_generator=None, epochs=2, augmentation_scale=3):
         if batch_generator is None:
             print("Cannot open batch generator. Please try again.")
         elif self.RNN is None:
@@ -57,10 +55,10 @@ class DatNet(object):
                         mean_tr_loss.append(loss)
                         # Reset the state because my RNN is stateful
                         self.RNN.reset_states()
-                    if batch_generator.cursor % 100 == 0:
+                    if batch_generator.cursor % 500 == 0:
                         print("Current batch: {}/{}, loss: {:7.4f} acc: {:5.2f}".format(batch_generator.cursor, limit,
-                                                                                        np.mean(mean_tr_loss),
-                                                                                        np.mean(mean_tr_acc)))
+                                                                                        np.mean(mean_tr_acc),
+                                                                                        np.mean(mean_tr_loss)))
                 print('Accuracy: {}, Loss: {}'.format(np.mean(mean_tr_acc), np.mean(mean_tr_loss)))
                 print('Batches ', batch_len)
                 print('_____________________________________________________________')
@@ -104,7 +102,7 @@ class DatNet(object):
         # batch-norm-relu-conv, from nb_in_filters to nb_bottleneck_filters via 1x1 conv
         x = BatchNormalization(axis=1, name=bn_name + 'c', mode=2)(x)
         x = Activation('relu', name=relu_name + 'c')(x)
-        x = Convolution2D(nb_in_filters, 3, 3, border_mode='same',  # Used to be 1x1 here, but it is slow
+        x = Convolution2D(nb_in_filters, 1, 1, border_mode='same',  # Used to be 1x1 here, but it is slow
                           init=init, W_regularizer=l2(reg),
                           name=conv_name + 'c'
                           )(x)
@@ -141,15 +139,13 @@ class DatNet(object):
 
         #  INPUT LAYERS
         # ###################################################################################
-        frame_sequence = Input(batch_shape=(BATCH_SIZE, TIME_STEPS, HEIGHT, WIDTH, CHANNELS))
-        frame = Input(shape=(HEIGHT, WIDTH, CHANNELS))
-        speed = Input(batch_shape=(BATCH_SIZE, TIME_STEPS, 1), name='curr_speed')
-        brake = Input(batch_shape=(BATCH_SIZE, TIME_STEPS, 1), name='curr_brake')
-        throttle = Input(batch_shape=(BATCH_SIZE, TIME_STEPS, 1), name='curr_throttle')
+        frame = Input(shape=(HEIGHT, WIDTH, CHANNELS), name='cifar')
+        # speed = Input(batch_shape=(BATCH_SIZE, TIME_STEPS, 1), name='curr_speed')
+        # brake = Input(batch_shape=(BATCH_SIZE, TIME_STEPS, 1), name='curr_brake')
+        # throttle = Input(batch_shape=(BATCH_SIZE, TIME_STEPS, 1), name='curr_throttle')
 
         # VISION MODEL - USING CNN
         # ####################################################################################
-
         x = Lambda(lambda image: image/255.0 - 0.5, input_shape=(HEIGHT, WIDTH, CHANNELS))(frame)
         x = Cropping2D(cropping=((30, 5), (1, 1)))(x)
         x = Convolution2D(nb_L1_filters, sz_L1_filters, sz_L1_filters, border_mode='same',
@@ -170,21 +166,33 @@ class DatNet(object):
         x = Dense(1024, name='fc1', activation='relu')(x)
         x = Dropout(0.5)(x)
         x = Dense(512, name='fc2', activation='relu')(x)
-        x = Dropout(0.5)(x)                                 # <-------------- This will be removed for fine-tuning
-        x = Dense(1, name='output')(x)                      # <-------------- This will be removed for fine-tuning
-        self.vision_model = Model(input=frame, output=x)
+        x = Dropout(0.5)(x)
+        x = Dense(256, name='fc3', activation='relu')(x)
+        x = Dropout(0.5)(x)
+        x = Dense(OUTPUT_DIM, name='output_2')(x)
 
+        model = Model(input=frame, output=x)
+
+        # Load weight manually
+        return model
+
+    def build_rnn(self):
+
+        frame_sequence = Input(batch_shape=(BATCH_SIZE, TIME_STEPS, HEIGHT, WIDTH, CHANNELS))
         # # RNN MODEL, STACKED ON TOP OF THE CNN
         # # ###################################################################################
         # Note: Time-Distributed Model, BatchNormalization is required to use `mode=2`
         net = TimeDistributed(self.vision_model, name='CNN_Time_Distributed')(frame_sequence)
-        net = GRU(HIDDEN_UNITS, return_sequences=True, stateful=True, name='GRU1')(net)
-        net = GRU(HIDDEN_UNITS, return_sequences=False, stateful=True, name='GRU2')(net)
-        net = Dense(128, activation='relu', name='RNN_FC1')(net)
-        net = Dropout(KEEP_PROP)(net)
+        net = GRU(HIDDEN_UNITS, return_sequences=True, stateful=True, name='GRU2_0')(net)
+        net = GRU(HIDDEN_UNITS, return_sequences=True, stateful=True, name='GRU2_1')(net)
+        net = GRU(HIDDEN_UNITS, return_sequences=False, stateful=True, name='GRU2_2')(net)
+        net = Dense(256, name='RNN_fc1', activation='relu')(net)
         net = Dense(OUTPUT_DIM, name='RNN_output')(net)
-        self.RNN = Model(input=frame_sequence, output=net)
+        model = Model(input=frame_sequence, output=net)
 
+        return model
 
 def mse_steer_angle(y_true, y_pred):
     return mean_squared_error(y_true[0], y_pred[0])
+
+

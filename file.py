@@ -7,13 +7,13 @@ import numpy as np
 import matplotlib.gridspec as grid
 plt.interactive(False)
 
-LOG_PATH = './data/good/driving_log.csv'
-IMG_PATH =  './data/good/IMG/'
+LOG_PATH = './data/driving_log.csv'
+IMG_PATH =  './data//IMG/'
 
 data = DataSet(LOG_PATH, IMG_PATH, sequence=TIME_STEPS)
 
 features, labels = data.build_train_data()
-pickle.dump({'features': features, 'labels': labels}, open('./train.p', 'wb'))
+pickle.dump({'features': features, 'labels': labels}, open('./data/map2.p', 'wb'))
 
 fig = plt.figure(figsize=(50, 50))
 idx = 6

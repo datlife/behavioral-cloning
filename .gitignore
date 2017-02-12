@@ -96,4 +96,3 @@ data/
 .idea/dictionaries/datinfo.xml
 chauffeur/lstm.weights
 *.p
-*.h5
