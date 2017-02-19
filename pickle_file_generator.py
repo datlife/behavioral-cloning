@@ -1,3 +1,11 @@
+'''
+Usage:
+
+This script is used to generate pickle file from Udacity car simulator.
+It will allow me to reuse dataset easier.
+
+Change LOG_PATH and IMG_PATH to generate new file
+'''
 
 import pickle
 from FLAGS import *
@@ -8,12 +16,13 @@ import matplotlib.gridspec as grid
 plt.interactive(False)
 
 LOG_PATH = './data/driving_log.csv'
-IMG_PATH =  './data//IMG/'
+IMG_PATH = './data/IMG/'
+FILE_NAME = './data/recovery_map2.p'
 
 data = DataSet(LOG_PATH, IMG_PATH, sequence=TIME_STEPS)
 
 features, labels = data.build_train_data()
-pickle.dump({'features': features, 'labels': labels}, open('./data/map2.p', 'wb'))
+pickle.dump({'features': features, 'labels': labels}, open(FILE_NAME, 'wb'), protocol=2)
 
 fig = plt.figure(figsize=(50, 50))
 idx = 6

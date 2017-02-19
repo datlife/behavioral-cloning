@@ -88,10 +88,11 @@ class DatNet(object):
         if stage > 1:  # first activation is just after conv1
             x = BatchNormalization(axis=1, name=bn_name + 'a', mode=2)(input_tensor)
             x = Activation('relu', name=relu_name + 'a')(x)
+            x = Dropout(0.50)(x)
         else:
             x = input_tensor
 
-        x = Convolution2D(nb_bottleneck_filters, 1, 1, init=init, W_regularizer=l2(reg),
+        x = Convolution2D(nb_bottleneck_filters, 1, 1, init=init, W_regularizer=l2(reg), border_mode='same',
                           bias=False, name=conv_name + 'a')(x)
         # batch-norm-relu-conv, from nb_bottleneck_filters to nb_bottleneck_filters via FxF conv
         x = BatchNormalization(axis=1, name=bn_name + 'b', mode=2)(x)
@@ -102,6 +103,8 @@ class DatNet(object):
         # batch-norm-relu-conv, from nb_in_filters to nb_bottleneck_filters via 1x1 conv
         x = BatchNormalization(axis=1, name=bn_name + 'c', mode=2)(x)
         x = Activation('relu', name=relu_name + 'c')(x)
+        x = Dropout(0.50)(x)
+
         x = Convolution2D(nb_in_filters, 1, 1, border_mode='same',  # Used to be 1x1 here, but it is slow
                           init=init, W_regularizer=l2(reg),
                           name=conv_name + 'c'
@@ -114,7 +117,7 @@ class DatNet(object):
 
     def build(self, nb_classes=10, input_shape=(HEIGHT, WIDTH, CHANNELS),
               layer1_params=(5, 32, 2), res_layer_params=(3, 16, 3),
-              init='glorot_normal', reg=0.0, use_shortcuts=True):
+              init='glorot_normal', reg=0.01, use_shortcuts=True):
         '''
         Return a new Residual Network using full pre-activation based on the work in
         "Identity Mappings in Deep Residual Networks"  by He et al
@@ -153,21 +156,22 @@ class DatNet(object):
                           bias=False, name='conv0')(x)
         x = BatchNormalization(axis=1, name='bn0', mode=2)(x)
         x = Activation('relu', name='relu0')(x)
-
+        x = Dropout(0.50)(x)
         # Bottle Neck Layers
         for stage in range(1, nb_res_stages + 1):
-            x = self._bottleneck_layer(x, (nb_L1_filters, nb_res_filters), sz_res_filters, stage,
-                                       init=init, reg=reg, use_shortcuts=use_shortcuts)
+            x = self._bottleneck_layer(x, (nb_L1_filters, nb_res_filters), sz_res_filters, stage, init=init, reg=reg)
+
         x = BatchNormalization(axis=1, name='bnF', mode=2)(x)
         x = Activation('relu', name='reluF')(x)
+        x = Dropout(0.50)(x)
         x = AveragePooling2D((sz_pool_fin, sz_pool_fin), name='avg_pool')(x)
         x = Flatten(name='flat')(x)
 
-        x = Dense(1024, name='fc1', activation='relu')(x)
+        x = Dense(1024, name='fc1', activation='relu', W_regularizer=l2(reg))(x)
         x = Dropout(0.5)(x)
-        x = Dense(512, name='fc2', activation='relu')(x)
+        x = Dense(512, name='fc2', activation='relu', W_regularizer=l2(reg))(x)
         x = Dropout(0.5)(x)
-        x = Dense(256, name='fc3', activation='relu')(x)
+        x = Dense(256, name='fc3', activation='relu', W_regularizer=l2(reg))(x)
         x = Dropout(0.5)(x)
         x = Dense(OUTPUT_DIM, name='output_2')(x)
 
@@ -183,7 +187,6 @@ class DatNet(object):
         # # ###################################################################################
         # Note: Time-Distributed Model, BatchNormalization is required to use `mode=2`
         net = TimeDistributed(self.vision_model, name='CNN_Time_Distributed')(frame_sequence)
-        net = GRU(HIDDEN_UNITS, return_sequences=True, stateful=True, name='GRU2_0')(net)
         net = GRU(HIDDEN_UNITS, return_sequences=True, stateful=True, name='GRU2_1')(net)
         net = GRU(HIDDEN_UNITS, return_sequences=False, stateful=True, name='GRU2_2')(net)
         net = Dense(256, name='RNN_fc1', activation='relu')(net)

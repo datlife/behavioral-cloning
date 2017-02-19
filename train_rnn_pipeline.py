@@ -1,3 +1,5 @@
+# ## NOT READY YET !!
+
 import pickle
 from FLAGS import *                                   # Stores parameters and hy
 from keras.optimizers import Adam
@@ -39,5 +41,3 @@ with open('model.json', 'w') as outfile:
     outfile.write(json_string)
 model.RNN.save_weights('model.h5')
 print('Model saved')
-
-#

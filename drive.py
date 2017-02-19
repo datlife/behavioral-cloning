@@ -14,8 +14,6 @@ import time
 import numpy as np
 from scipy.misc import imresize
 from keras.models import model_from_json
-from FLAGS import *
-from utils.car_helper import convert_buckets_to_steer_angle
 from datetime import datetime
 
 sio = socketio.Server()
@@ -33,10 +31,12 @@ def telemetry(sid, data):
         start = time.clock()
         image = np.asarray(image)
         image = imresize(image, 0.5)
+
         prediction = model.predict(image[None, :, :, :], batch_size=1)
+
         steering_angle = prediction[0][0]
         throttle = prediction[0][1]
-        # throttle = 0.3
+        # throttle = 0.4
 
         end = time.clock()
 

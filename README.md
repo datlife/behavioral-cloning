@@ -1,8 +1,7 @@
 Driving Behavioral Cloning
 ==========================
 
-Status: Building
-### Self-Driving Car Project
+**Status**: Completed
 
 This project is to mimic human driving behavior into a car. 
 
@@ -13,8 +12,12 @@ This project is to mimic human driving behavior into a car.
   
     
 
-## 1. Model Architecture
+## 1. Deep ResNet Pre-Activation works well
 
-## 2. Data Collection and Training
+#### 1.1 Network Architecture Considerations
 
-## 3. Autonomous Driving Test in simulator
+## 2. Data Augmentation is needed.
+
+#### 2.1 OpenCV is
+
+## 3. From Simulator to Real-life
