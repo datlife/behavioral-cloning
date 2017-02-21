@@ -31,12 +31,14 @@ def telemetry(sid, data):
         start = time.clock()
         image = np.asarray(image)
         image = imresize(image, 0.5)
+        # cut the sky
+        image = image[29:75, :]
 
         prediction = model.predict(image[None, :, :, :], batch_size=1)
 
         steering_angle = prediction[0][0]
-        throttle = prediction[0][1]
-        # throttle = 0.4
+        # throttle = prediction[0][1]
+        throttle = 0.35
 
         end = time.clock()
 

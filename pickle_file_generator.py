@@ -17,7 +17,7 @@ plt.interactive(False)
 
 LOG_PATH = './data/driving_log.csv'
 IMG_PATH = './data/IMG/'
-FILE_NAME = './data/recovery_map2.p'
+FILE_NAME = './data/recovery2_map2.p'
 
 data = DataSet(LOG_PATH, IMG_PATH, sequence=TIME_STEPS)
 

@@ -2,7 +2,7 @@
 
 import pickle
 from FLAGS import *                                   # Stores parameters and hy
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop
 from model.BatchGenerator import BatchGenerator       # Generate batch file to feed into my RNN
 from model.DatNet import DatNet, mse_steer_angle      # Compute the loss of steering angle
 from keras.models import model_from_json
@@ -31,7 +31,7 @@ model.RNN.load_weights('model.h5')
 # # Compile
 # # TODO:
 # # Find better loss function
-model.RNN.compile(optimizer=Adam(lr=0.001), loss=[mse_steer_angle], metrics=['mse'])
+model.RNN.compile(optimizer=RMSprop(lr=0.001), loss=[mse_steer_angle], metrics=['mse'])
 model.train_rnn(batch_generator=batch_gen, epochs=2, augmentation_scale=1)
 model.RNN.summary()
 

@@ -88,11 +88,12 @@ class DatNet(object):
         if stage > 1:  # first activation is just after conv1
             x = BatchNormalization(axis=1, name=bn_name + 'a', mode=2)(input_tensor)
             x = Activation('relu', name=relu_name + 'a')(x)
-            x = Dropout(0.50)(x)
+            x = Dropout(KEEP_PROP)(x)
         else:
             x = input_tensor
 
-        x = Convolution2D(nb_bottleneck_filters, 1, 1, init=init, W_regularizer=l2(reg), border_mode='same',
+        x = Convolution2D(nb_bottleneck_filters, 1, 1,
+                          init=init, W_regularizer=l2(reg), border_mode='valid',
                           bias=False, name=conv_name + 'a')(x)
         # batch-norm-relu-conv, from nb_bottleneck_filters to nb_bottleneck_filters via FxF conv
         x = BatchNormalization(axis=1, name=bn_name + 'b', mode=2)(x)
@@ -103,9 +104,9 @@ class DatNet(object):
         # batch-norm-relu-conv, from nb_in_filters to nb_bottleneck_filters via 1x1 conv
         x = BatchNormalization(axis=1, name=bn_name + 'c', mode=2)(x)
         x = Activation('relu', name=relu_name + 'c')(x)
-        x = Dropout(0.50)(x)
+        x = Dropout(KEEP_PROP)(x)
 
-        x = Convolution2D(nb_in_filters, 1, 1, border_mode='same',  # Used to be 1x1 here, but it is slow
+        x = Convolution2D(nb_in_filters, 1, 1,
                           init=init, W_regularizer=l2(reg),
                           name=conv_name + 'c'
                           )(x)
@@ -138,7 +139,7 @@ class DatNet(object):
         # ##################################################################################
         sz_L1_filters, nb_L1_filters, stride_L1 = layer1_params
         sz_res_filters, nb_res_filters, nb_res_stages = res_layer_params
-        sz_pool_fin = (input_shape[0] - 30 - 5) / stride_L1
+        sz_pool_fin = (input_shape[0]) / stride_L1
 
         #  INPUT LAYERS
         # ###################################################################################
@@ -150,30 +151,30 @@ class DatNet(object):
         # VISION MODEL - USING CNN
         # ####################################################################################
         x = Lambda(lambda image: image/255.0 - 0.5, input_shape=(HEIGHT, WIDTH, CHANNELS))(frame)
-        x = Cropping2D(cropping=((30, 5), (1, 1)))(x)
+        # x = Cropping2D(cropping=((30, 5), (1, 1)))(x)
         x = Convolution2D(nb_L1_filters, sz_L1_filters, sz_L1_filters, border_mode='same',
                           subsample=(stride_L1, stride_L1), init=init, W_regularizer=l2(reg),
                           bias=False, name='conv0')(x)
         x = BatchNormalization(axis=1, name='bn0', mode=2)(x)
         x = Activation('relu', name='relu0')(x)
-        x = Dropout(0.50)(x)
+        x = Dropout(KEEP_PROP)(x)
         # Bottle Neck Layers
         for stage in range(1, nb_res_stages + 1):
             x = self._bottleneck_layer(x, (nb_L1_filters, nb_res_filters), sz_res_filters, stage, init=init, reg=reg)
 
         x = BatchNormalization(axis=1, name='bnF', mode=2)(x)
         x = Activation('relu', name='reluF')(x)
-        x = Dropout(0.50)(x)
+        x = Dropout(KEEP_PROP)(x)
         x = AveragePooling2D((sz_pool_fin, sz_pool_fin), name='avg_pool')(x)
         x = Flatten(name='flat')(x)
 
-        x = Dense(1024, name='fc1', activation='relu', W_regularizer=l2(reg))(x)
+        x = Dense(1024, name='fc1', activation='relu')(x)
         x = Dropout(0.5)(x)
-        x = Dense(512, name='fc2', activation='relu', W_regularizer=l2(reg))(x)
+        x = Dense(512, name='fc2', activation='relu')(x)
         x = Dropout(0.5)(x)
-        x = Dense(256, name='fc3', activation='relu', W_regularizer=l2(reg))(x)
+        x = Dense(256, name='fc3', activation='relu')(x)
         x = Dropout(0.5)(x)
-        x = Dense(OUTPUT_DIM, name='output_2')(x)
+        x = Dense(OUTPUT_DIM, name='output_1')(x)
 
         model = Model(input=frame, output=x)
 

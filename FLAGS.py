@@ -1,5 +1,5 @@
 # Image Size
-HEIGHT = 80
+HEIGHT = 46 # sky is removed .. in train.py
 WIDTH = 160
 CHANNELS = 3
 # Cropping factor
@@ -13,7 +13,7 @@ STEER_CORRECTION = 0.2
 # HYPER-PARAMETER
 LOAD_WEIGHT = True
 LEARN_RATE = 0.001
-KEEP_PROP = 0.3
+KEEP_PROP = 0.4
 EPOCHS = 1
 BATCH_SIZE = 4     # Be careful, stateful RNN requires to state batch size ahead
 TIME_STEPS = 10    # For RNN
