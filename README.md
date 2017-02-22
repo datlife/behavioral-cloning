@@ -9,7 +9,7 @@ This project is to mimic human driving behavior into a car.
 
 | Track 1       | Track 2       | 
 | ------------- |---------------|
-| ![](http://i.giphy.com/zrstOxqEMCPmg.gif)      | ![](http://i.giphy.com/xTiN0tGdX0EAyw8ily.gif)|
+| ![alt text](https://github.com/dat-ai/behavioral-cloning/blob/master/docs/track1.gif)      | ![alt text](https://github.com/dat-ai/behavioral-cloning/blob/master/docs/track2.gif)|
 
 #### Summary:
 
