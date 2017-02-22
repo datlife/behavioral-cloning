@@ -12,9 +12,6 @@ import numpy as np
 LEFT_CONTEXT = 5
 from FLAGS import *
 import cv2
-from utils.image_processor import random_transform
-from utils.car_helper import convert_steering_angle_to_buckets
-
 
 class BatchGenerator(object):
     def __init__(self, sequence, labels, seq_len, batch_size):

@@ -46,10 +46,10 @@ class DataSet(object):
                     center_measurements.append((self.df.loc[i]['steer_angle'], self.df.loc[i]['throttle'], self.df.loc[i]['brake']))
                 if image == 'left':
                     left_images.append(img)
-                    left_measurements.append((self.df.loc[i]['steer_angle'] + 0.35, self.df.loc[i]['throttle'], self.df.loc[i]['brake']))
+                    left_measurements.append((self.df.loc[i]['steer_angle'] + 0.30, self.df.loc[i]['throttle'], self.df.loc[i]['brake']))
                 if image == 'right':
                     right_images.append(img)
-                    right_measurements.append((self.df.loc[i]['steer_angle'] - 0.35, self.df.loc[i]['throttle'], self.df.loc[i]['brake']))
+                    right_measurements.append((self.df.loc[i]['steer_angle'] - 0.30, self.df.loc[i]['throttle'], self.df.loc[i]['brake']))
 
         self.y_train = np.concatenate((center_measurements, left_measurements, right_measurements))
         self.X_train = np.concatenate((images, left_images, right_images))
