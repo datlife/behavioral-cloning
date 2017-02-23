@@ -5,13 +5,11 @@ Driving Behavioral Cloning
 This project is to mimic human driving behavior into a car. 
 
 ### Dependencies
-----------------
 
 This project requires users to have additional libraries installed in order to use. Udacity provided a good solution by sharing  a ready-to-use environment `CarND-Term1-Starter-Kit` for students. Please refer [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/doc/configure_via_anaconda.md) on how to install.
 
 
 ### How to use:
----------------
 1. Download CarND Udacity Simulator ([here]())
 
 2. Open car simulator in autonomous mode
@@ -20,8 +18,7 @@ This project requires users to have additional libraries installed in order to u
 
 4. Enjoy your first autonomous drive!
 
-#### Result:
-------------
+### Result:
 
 | Track 1       | Track 2       | 
 | ------------- |---------------|
@@ -30,7 +27,7 @@ This project requires users to have additional libraries installed in order to u
 
     
 ## 1. Deep ResNet Pre-Activation works well
-
+-------------------------------------------
 ### 1.1 Network Architecture Considerations
 
 My appoarch is to try to minimize the amount of parameters low while retaining the accuracy as high as possible. Many suggests to use [NVIDIA End-to-End Learning For Self-Driving Cars](https://arxiv.org/pdf/1604.07316v1.pdf) since it is provenly well-suited for this problem. However, I wanted to explore something new. 
@@ -140,6 +137,7 @@ Non-trainable params: 598
 In the future, I would like to use recurrent neural network for this project. The reaons is every change in this world is respected to time domain.  Personally, it is not intuitive to use static image for data changing over time. Nevertherless, I am satisfied with my final result. In the next section, I will dive into some tips and tricks that I used to tackle the project.
 
 ## 2. Data Augmentation
+-----------------------
 
 ### 2.1 OpenCV is wonderful
 The goal of data augmentation is to assist the model generalize better. In this project, I re-used to image tools from project 2 which take an image and perform multiple transformations(blurring, rotation and chaning brightness of an image)
@@ -180,6 +178,7 @@ for image, measurement in zip(images, measurements):
 ```
 
 ## 3. Training strategies
+-------------------------
 
 * In this particular project, training goal is to minimize the loss (mean square root errors) of the steering angle. In my labels, I had `[steering_angle, throttle, speed]` (for my future RNN's model), I had to write a custom loss function as following:
 ```shell
