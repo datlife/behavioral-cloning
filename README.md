@@ -33,7 +33,11 @@ My appoarch is to try to minimize the amount of parameters low while retaining t
 
 The input of this problem is temporal input. Recurrent Neural Network actually should be applied to this problem. In fact, the [winner](https://github.com/udacity/self-driving-car/tree/master/challenges/challenge-2) of the Udacity Challenge 2 used an LSTM + CNN to train his model. I tried to implemented it in `DatNet.py`, however, it was hard to train or I might not know how to train it properly yet. On theory, this should work better than a Convolutional Neural Networks.
 
-As limited of time resources, I decided to switch back to CNN. I found an intersting paper about combing the advantage of `ResNet` and `Pre-Activation` pattern to build a CNN by [`He et all`](https://arxiv.org/pdf/1603.05027.pdf). I tried to implemented it. Woolah, it provided me much  better result.
+As limited of time resources, I decided to switch back to CNN. I found an intersting paper by [`He et all`](https://arxiv.org/pdf/1603.05027.pdf). Basically, they did not use traditional Conv--->ReLU-->MaxPool. Instead, they eliminated MaxPool and performed BatchNorm before Activation along with `ResNet` architecture. So it would be something like following
+
+![alt](https://github.com/dat-ai/behavioral-cloning/raw/master/docs/resnet_preact.PNG)
+
+Before fully connected layer, they did avergage pooling. This significantly reduces the amount of parameters.  I tried to implemented it. Woolah, it provided me much  better result.
 
 Here is my Network architecture.
 
