@@ -154,9 +154,9 @@ def random_transform(img):
         img = gamma(img)
     return img
 ```
-### 2.2 Flipped that image!
+### 2.2 Flip that image!
 
-You might found that during training you unconsciously was biased toward one side of street. So flipping the image helps your model generalizes better as well as. As suggested by Udacity, driving in opposite direction also helps your model. The reason is the lap has too many left turns. By driving in reversed direction, you force your model to learn the right turn too. 
+You might found that during data collection you might be unconsciously biased toward one side of street. So flipping the image helps your model generalize better. As suggested by Udacity, driving in opposite direction also helps your model. The reason is the lap has too many left turns. By driving in reversed direction, you force your model to learn the right turn too. 
 ```shell
 # #############################
 # ## DATA AUGMENTATION ########
