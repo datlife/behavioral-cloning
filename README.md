@@ -41,6 +41,8 @@ Here is my Network architecture.
 
 ### 1.2 Future goal, Recurrent Neural Network + CNN
 
+In the future, I would like to use recurrent neural network for this project. The reaons is every change in this world is respected to time domain.  Personally, it is not intuitive to use static image for data changing over time. Nevertherless, I am satisfied with my final result. In the next section, I will dive into ome tips and tricks that I used to tackle the project.
+
 ## 2. Data Augmentation
 
 ### 2.1 OpenCV is wonderful
