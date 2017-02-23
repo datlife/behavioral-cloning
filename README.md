@@ -53,9 +53,30 @@ def random_transform(img):
 You might found that during training you unconsciously was biased toward one side of street. So flipping the image helps your model generalizes better as well as. As suggested by Udacity, driving in opposite direction also helps your model. The reason is the lap has too many left turns. By driving in reversed direction, you force your model to learn the right turn too. Here are my few examples that indicates your model might not generalize enough:
 
 1. Turn too the left or right (only)
+
 ![bad-turn]()
 
 2. Stay on one side of the street.
+
+```shell
+# #############################
+# ## DATA AUGMENTATION ########
+###############################
+
+from utils.image_processor import random_transform
+augmented_images = []
+augmented_measurements = []
+for image, measurement in zip(images, measurements):
+    flipped_image = cv2.flip(image, 1)
+    augmented_images.append(flipped_image)
+
+    flipped_angle = measurement[0] * -1.0
+    augmented_measurements.append((flipped_angle, measurement[1], measurement[2]))
+    # #
+    rand_image = random_transform(image)
+    augmented_images.append(rand_image)
+    augmented_measurements.append(measurement)
+```
 
 ## 3. Know when to stop
 #### 3.1 Training strategies
