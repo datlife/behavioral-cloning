@@ -180,7 +180,7 @@ for image, measurement in zip(images, measurements):
 ## 3. Training strategies
 -------------------------
 
-* In this particular project, training goal is to minimize the loss (mean square root errors) of the steering angle. In my labels, I had `[steering_angle, throttle, speed]` (for my future RNN's model), I had to write a custom loss function as following:
+* In this particular project, training goal is to minimize the loss (mean root square errors) of the steering angle. In my labels, I had `[steering_angle, throttle, speed]` (for my future RNN's model), I had to write a custom loss function as following:
 ```shell
 def mse_steer_angle(y_true, y_pred):
     ''' Custom loss function to minimize Loss for steering angle '''
