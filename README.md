@@ -50,14 +50,7 @@ def random_transform(img):
 ```
 #### 2.2 Flipped that image!
 
-You might found that during training you unconsciously was biased toward one side of street. So flipping the image helps your model generalizes better as well as. As suggested by Udacity, driving in opposite direction also helps your model. The reason is the lap has too many left turns. By driving in reversed direction, you force your model to learn the right turn too. Here are my few examples that indicates your model might not generalize enough:
-
-1. Turn too the left or right (only)
-
-![bad-turn]()
-
-2. Stay on one side of the street.
-
+You might found that during training you unconsciously was biased toward one side of street. So flipping the image helps your model generalizes better as well as. As suggested by Udacity, driving in opposite direction also helps your model. The reason is the lap has too many left turns. By driving in reversed direction, you force your model to learn the right turn too. 
 ```shell
 # #############################
 # ## DATA AUGMENTATION ########
@@ -91,9 +84,26 @@ def mse_steer_angle(y_true, y_pred):
  # Compile model
  model.compile(optimizer=Adam(lr=learn_rate), loss=[mse_steer_angle])
 ```
-#### 3.1 Know when to stop
-One of the mistakes I made during the traning process was that I was focused to minimize my mean
-#### 3.2 Becareful to high learning rate
+### 3.2 Becareful to high learning rate
+![alttext](https://github.com/dat-ai/behavioral-cloning/raw/master/docs/alpha2.png)
+
+Another issue is I initially set my training rate to `0.001` as many suggested. However, it did not work well for me. My loss kept fluctuating. So I decided to go lower learning rate `0.0001` and it worked. Therefore, if you see your loss flucuates during the training process. It is a strong indication that the learning rate might be too high. Try to lower the learning rate if it helps.
+
+### 3.1 Know when to stop
+One of the mistakes I made during the traning process was that I was focused to minimize my mse. I realized I sometimes did not drive perfectly correct during training, why did I expect my model's loss is nearly zero. What happened to me is if I trained my model too long, it would drive very weird in one map. Therefore, my training statergy is to lower my learning rate to stop early. If I tested my model on the simulator and it worked as expeted, I stopped training process. Also, saving your model during every epochs could be helpful, here is how I did it.
+
+```shell
+from keras.callbacks import ModelCheckpoint
+
+....
+
+checkpoint = ModelCheckpoint('checkpoints/weights.{epoch:02d}-{val_loss:.3f}.h5', save_weights_only=True)
+
+...
+model.fit_generator(data_augment_generator(images, measurements, batch_size=batch_size), samples_per_epoch=data_size,
+                     callbacks=[checkpoint], nb_val_samples=data_size * 0.2, nb_epoch=epochs)
+```
+
 
 ## 4. From simulator to real RC racing car
 
