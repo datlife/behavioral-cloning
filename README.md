@@ -31,10 +31,10 @@ This project requires users to have additional libraries installed in order to u
 
 #### 1.2 Future goal, Recurrent Neural Network + CNN
 
-## 2. Data Augmentation is needed.
+## 2. Data Augmentation
 
 #### 2.1 OpenCV is wonderful
-The goal of data augmentation is to assist the model generalize better. In this project, I re-used to image tools from project 2 which take an image and perform multiple transformations, which are blurring, rotation and chaning brightness of an image.. randomly!
+The goal of data augmentation is to assist the model generalize better. In this project, I re-used to image tools from project 2 which take an image and perform multiple transformations(blurring, rotation and chaning brightness of an image)
 ```shell
 def random_transform(img):
     # There are total of 3 transformation
@@ -78,8 +78,23 @@ for image, measurement in zip(images, measurements):
     augmented_measurements.append(measurement)
 ```
 
-## 3. Know when to stop
-#### 3.1 Training strategies
+## 3. Training strategies
+
+In this particular project, training goal is to minimize the loss (mean square root errors) of the steering angle. In my labels, I had `[steering_angle, throttle, speed]` (to make it work on the RNN), I had to write a custom loss function as following:
+```shell
+def mse_steer_angle(y_true, y_pred):
+    ''' Custom loss function to minimize Loss for steering angle '''
+    return mean_squared_error(y_true[0], y_pred[0])
+```
+
+In order to use this custom loss function, I applied my loss during the compilation of my model:
+```shell
+ # Compile model
+ model.compile(optimizer=Adam(lr=learn_rate), loss=[mse_steer_angle])
+
+```
+#### 3.1 Know when to stop
+One of the mistakes I made during the traning process was that I was focused to minimize my mean
 #### 3.2 Becareful to high learning rate
 
 ## 4. From simulator to real RC racing car
