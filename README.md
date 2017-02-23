@@ -13,7 +13,7 @@ This project requires users to have additional libraries installed in order to u
 
 ### How to use:
 
-1. Download CarND Udacity Simulator ([here]()]
+1. Download CarND Udacity Simulator ([here]())
 2. Open car simulator in autonomous mode
 3. Open a terminal, run `python drive.py model/cnn.h5` (cnn.h5 is my pre-trained model)
 4. Enjoy your first autonomous drive!
