@@ -27,13 +27,23 @@ This project requires users to have additional libraries installed in order to u
     
 ## 1. Deep ResNet Pre-Activation works well
 
-#### 1.1 Network Architecture Considerations
+### 1.1 Network Architecture Considerations
 
-#### 1.2 Future goal, Recurrent Neural Network + CNN
+My appoarch is to try to minimize the amount of parameters low while retaining the accuracy as high as possible. Many suggests to use [NVIDIA End-to-End Learning For Self-Driving Cars](https://arxiv.org/pdf/1604.07316v1.pdf) since it is provenly well-suited for this problem. However, I wanted to explore something new. 
+
+The input of this problem is temporal input. Recurrent Neural Network actually should be applied to this problem. In fact, the [winner](https://github.com/udacity/self-driving-car/tree/master/challenges/challenge-2) of the Udacity Challenge 2 used an LSTM + CNN to train his model. I tried to implemented it in `DatNet.py`, however, it was hard to train or I might not know how to train it properly yet. On theory, this should work better than a Convolutional Neural Networks.
+
+As limited of time resources, I decided to switch back to CNN. I found an intersting paper about combing the advantage of `ResNet` and `Pre-Activation` pattern to build a CNN by [`He et all`](https://arxiv.org/pdf/1603.05027.pdf). I tried to implemented it. Woolah, it provided me much  better result.
+
+Here is my Network architecture.
+
+
+
+### 1.2 Future goal, Recurrent Neural Network + CNN
 
 ## 2. Data Augmentation
 
-#### 2.1 OpenCV is wonderful
+### 2.1 OpenCV is wonderful
 The goal of data augmentation is to assist the model generalize better. In this project, I re-used to image tools from project 2 which take an image and perform multiple transformations(blurring, rotation and chaning brightness of an image)
 ```shell
 def random_transform(img):
@@ -48,7 +58,7 @@ def random_transform(img):
         img = gamma(img)
     return img
 ```
-#### 2.2 Flipped that image!
+### 2.2 Flipped that image!
 
 You might found that during training you unconsciously was biased toward one side of street. So flipping the image helps your model generalizes better as well as. As suggested by Udacity, driving in opposite direction also helps your model. The reason is the lap has too many left turns. By driving in reversed direction, you force your model to learn the right turn too. 
 ```shell
