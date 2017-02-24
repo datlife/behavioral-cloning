@@ -32,13 +32,13 @@ This project requires users to have additional libraries installed in order to u
 
 My appoarch is to try to minimize the amount of parameters low while retaining the accuracy as high as possible. Many suggests to use [NVIDIA End-to-End Learning For Self-Driving Cars](https://arxiv.org/pdf/1604.07316v1.pdf) since it is provenly well-suited for this problem. However, I want to explore something new. 
 
-The input of this problem is temporal input. Recurrent Neural Network actually should be applied to this problem. In fact, the [winner](https://github.com/udacity/self-driving-car/tree/master/challenges/challenge-2) of the Udacity Challenge 2 used an LSTM + CNN to train his model. I tried to implemented it in `DatNet.py`, however, it was hard to train or I might not know how to train it properly yet. On theory, this should work better than a Convolutional Neural Networks.
+The input of this problem is temporal input. Recurrent Neural Network actually should be applied to this problem. In fact, the [winner](https://github.com/udacity/self-driving-car/tree/master/challenges/challenge-2) of the Udacity Challenge 2 used an LSTM + CNN to train his model. I tried to implemented it in `DatNet.py`, however, it was hard to train due to exploding vanishing gradient or I might not know how to train it properly yet. In theory, this should work better than a Convolutional Neural Networks.
 
 As limited of time resources, I decided to switch back to CNN. I found an intersting paper by [`He et all`](https://arxiv.org/pdf/1603.05027.pdf). Basically, they did not use traditional Conv--->ReLU-->MaxPool. Instead, they eliminated MaxPool and performed BatchNorm before Activation along with `ResNet` architecture. So it would be something like following
 
 ![alt](https://github.com/dat-ai/behavioral-cloning/raw/master/docs/resnet_preact.PNG)
 
-Before fully connected layer, they did avergage pooling. This significantly reduces the amount of parameters.  I tried to implemented it. Woolah, it provided me much  better result.
+Before fully connected layer, they did avergage pooling. This significantly reduces the amount of parameters.  I tried to implement it. Woolah, it provided me much  better result.
 
 Here is my Network architecture.
 
@@ -134,13 +134,13 @@ Non-trainable params: 598
 
 ### 1.2 Future goal, Recurrent Neural Network + CNN
 
-In the future, I would like to use recurrent neural network for this project. The reaons is every change in this world is respected to time domain.  Personally, it is not intuitive to use static image for data changing over time. Nevertherless, I am satisfied with my final result. In the next section, I will dive into some tips and tricks that I used to tackle the project.
+In the future, I would like to use recurrent neural network for this project. The reason is every change in this world is respected to time domain. Personally, it is not intuitive to use static image for data changing over time. Nevertheless, I am satisfied with my final result. In the next section, I will dive into some tips and tricks that I used to tackle the project.
 
 ## 2. Data Augmentation
 -----------------------
 
 ### 2.1 OpenCV is wonderful
-The goal of data augmentation is to assist the model generalize better. In this project, I re-used to image tools from project 2 which take an image and perform multiple transformations(blurring, rotation and chaning brightness of an image)
+The goal of data augmentation is to assist the model generalize better. In this project, I re-used to image tools from project 2, which take an image and perform multiple transformations(blurring, rotation and chaning brightness).
 ```shell
 def random_transform(img):
     # There are total of 3 transformation
@@ -191,13 +191,13 @@ def mse_steer_angle(y_true, y_pred):
  # Compile model
  model.compile(optimizer=Adam(lr=learn_rate), loss=[mse_steer_angle])
 ```
-### 3.2 Becareful to high learning rate
+### 3.1 Becareful to high learning rate
 ![alttext](https://github.com/dat-ai/behavioral-cloning/raw/master/docs/alpha2.png)
 
-Another issue is I initially set my training rate to `0.001` as many suggested. However, it did not work well for me. My loss kept fluctuating. So I decided to go lower learning rate `0.0001` and it worked. Therefore, if you see your loss flucuates during the training process. It is a strong indication that the learning rate might be too high. Try to lower the learning rate if it helps.
+Another issue is I initially set my training rate to `0.001` as many suggested. However, it did not work well for me. My loss kept fluctuating. So I decided to go lower learning rate `0.0001` and it worked. Therefore, if you see your loss flucuates during the training process. It is a strong indication that the learning rate might be too high. Try to lower the learning rate.
 
-### 3.1 Know when to stop
-One of the mistakes I made during the traning process was that I was focused to minimize my mse. I realized I sometimes did not drive perfectly correct during training, why did I expect my model's loss is nearly zero. What happened to me is if I trained my model too long, it would drive very weird in one map. Therefore, my training statergy is to lower my learning rate to stop early. If I tested my model on the simulator and it worked as expeted, I stopped training process. Also, saving your model during every epochs could be helpful, here is how I did it.
+### 3.2 Know when to stop
+One of the mistakes I made during the training process was too focused on minimizing loss for steering angle. What happened to me was if I trained my model too long, it would drive very weird in one map. Therefore, my training strategy is to lower my learning rate and to use early stopping technique. Once my model worked as expected in the simulator, I stopped the training process. If you are not very satisfied to your result. Try use lower learning rate `0.0001` to `0.00001`. Also, saving your model during every epochs could be helpful, too. Here is how I did it.
 
 ```shell
 from keras.callbacks import ModelCheckpoint
